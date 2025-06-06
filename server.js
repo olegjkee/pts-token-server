@@ -2,6 +2,9 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Пароль для админ-панели (можно изменить)
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123PTS';
+
 // Middleware для обработки JSON
 app.use(express.json());
 app.use(express.static(__dirname)); // Для статических файлов
@@ -9,6 +12,15 @@ app.use(express.static(__dirname)); // Для статических файло�
 let currentToken = { name: 'GMGN Token', contract: 'Ey59PH7Z4BFU4HjyKnyMdWt5GGN76KazTAwQihoUXRnk' };
 let nextToken = null; // Токен, который заменит текущий по таймеру
 let nextUpdateTime = Date.now() + (2 * 60 * 60 * 1000); // Время следующего обновления
+
+// Функция проверки пароля
+function checkAdminAuth(req, res, next) {
+    const password = req.headers['x-admin-password'] || req.body.password;
+    if (password !== ADMIN_PASSWORD) {
+        return res.status(401).json({ success: false, error: 'Неверный пароль' });
+    }
+    next();
+}
 
 // Функция смены токена по таймеру
 function switchToNextToken() {
@@ -39,7 +51,7 @@ app.get('/token', (req, res) => {
     res.json(currentToken);
 });
 
-app.get('/admin-status', (req, res) => {
+app.get('/admin-status', checkAdminAuth, (req, res) => {
     const status = { 
         currentToken, 
         nextToken, 
@@ -50,7 +62,17 @@ app.get('/admin-status', (req, res) => {
     res.json(status);
 });
 
-app.post('/set-next-token', (req, res) => {
+// Эндпоинт для проверки пароля
+app.post('/admin-login', (req, res) => {
+    const { password } = req.body;
+    if (password === ADMIN_PASSWORD) {
+        res.json({ success: true, message: 'Доступ разрешен' });
+    } else {
+        res.status(401).json({ success: false, error: 'Неверный пароль' });
+    }
+});
+
+app.post('/set-next-token', checkAdminAuth, (req, res) => {
     console.log('Получен запрос set-next-token:', req.body);
     const { contract, name } = req.body;
     
@@ -63,7 +85,7 @@ app.post('/set-next-token', (req, res) => {
     res.json({ success: true, nextToken });
 });
 
-app.post('/switch-now', (req, res) => {
+app.post('/switch-now', checkAdminAuth, (req, res) => {
     console.log('Запрос немедленной смены токена');
     if (nextToken) {
         switchToNextToken();
@@ -73,7 +95,7 @@ app.post('/switch-now', (req, res) => {
     }
 });
 
-app.post('/reset-timer', (req, res) => {
+app.post('/reset-timer', checkAdminAuth, (req, res) => {
     console.log('Сброс таймера');
     nextUpdateTime = Date.now() + (2 * 60 * 60 * 1000);
     res.json({ success: true, nextUpdateTime });
