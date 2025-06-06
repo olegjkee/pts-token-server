@@ -112,6 +112,20 @@ app.post('/reset-timer', checkAdminAuth, (req, res) => {
     res.json({ success: true, nextUpdateTime });
 });
 
+app.post('/update-current-token', checkAdminAuth, (req, res) => {
+    console.log('Получен запрос update-current-token:', req.body);
+    const { contract, name } = req.body;
+    
+    if (!contract) {
+        return res.status(400).json({ success: false, error: 'Contract required' });
+    }
+    
+    // Обновляем текущий токен, НЕ сбрасывая таймер
+    currentToken = { name: name || 'Updated Token', contract };
+    console.log('Текущий токен обновлен:', currentToken);
+    res.json({ success: true, currentToken, nextUpdateTime });
+});
+
 app.listen(port, '0.0.0.0', () => {
     console.log(`🚀 Сервер запущен на http://localhost:${port}`);
     console.log(`🌐 Доступен в локальной сети на http://[YOUR_IP]:${port}`);

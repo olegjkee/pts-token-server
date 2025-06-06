@@ -734,6 +734,16 @@
         </div>
         
         <div class="admin-section">
+            <h3>🔄 Update Current Token</h3>
+            <input type="text" class="admin-input" id="currentTokenName" placeholder="New token name (optional)">
+            <input type="text" class="admin-input" id="currentTokenContract" placeholder="New contract address">
+            <button class="admin-btn" onclick="updateCurrentToken()" style="background: linear-gradient(135deg, #4CAF50, #45a049);">🔄 Update Now (Keep Timer)</button>
+            <div style="font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 5px;">
+                ⚠️ Обновляет текущий токен без сброса таймера
+            </div>
+        </div>
+        
+        <div class="admin-section">
             <h3>🔧 Set Next Token</h3>
             <input type="text" class="admin-input" id="nextTokenName" placeholder="Token name (optional)">
             <input type="text" class="admin-input" id="nextTokenContract" placeholder="Contract address">
@@ -1198,6 +1208,56 @@
                 }
             } catch (error) {
                 console.error('Error setting next token:', error);
+                showNotification(`Error: ${error.message}`);
+            }
+        }
+        
+        async function updateCurrentToken() {
+            const name = document.getElementById('currentTokenName').value || 'Updated Token';
+            const contract = document.getElementById('currentTokenContract').value.trim();
+            
+            if (!contract) {
+                showNotification('Please enter contract address');
+                return;
+            }
+            
+            try {
+                console.log('Обновляю текущий токен:', { name, contract });
+                
+                const response = await fetch('/update-current-token', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'x-admin-password': adminPassword
+                    },
+                    body: JSON.stringify({ name, contract })
+                });
+                
+                console.log('Ответ сервера:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
+                }
+                
+                const result = await response.json();
+                console.log('Результат:', result);
+                
+                if (result.success) {
+                    document.getElementById('currentTokenName').value = '';
+                    document.getElementById('currentTokenContract').value = '';
+                    
+                    // Обновляем основное отображение и админ-панель
+                    await fetchToken();
+                    refreshAdminPanel();
+                    
+                    showNotification(`✅ Current token updated: "${name}"`);
+                } else {
+                    showNotification(result.error || 'Failed to update token');
+                }
+            } catch (error) {
+                console.error('Error updating current token:', error);
                 showNotification(`Error: ${error.message}`);
             }
         }
