@@ -3,7 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Токен</title>
+    <title>🚀 PTS Project - Token Pump Station</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    
+    <!-- Meta теги для соцсетей -->
+    <meta name="description" content="PTS Project - Token Pump Station. Мониторинг и управление криптовалютными токенами в реальном времени.">
+    <meta name="keywords" content="crypto, token, pump, blockchain, PTS, криптовалюта, токен">
+    <meta name="author" content="PTS Project">
+    
+    <!-- Open Graph для соцсетей -->
+    <meta property="og:title" content="🚀 PTS Project - Token Pump Station">
+    <meta property="og:description" content="Мониторинг и управление криптовалютными токенами в реальном времени">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630' viewBox='0 0 1200 630'><rect width='1200' height='630' fill='%23232b2b'/><text x='600' y='350' text-anchor='middle' font-family='Arial' font-size='120' fill='%23ff3333'>🚀 PTS</text></svg>">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="🚀 PTS Project - Token Pump Station">
+    <meta name="twitter:description" content="Мониторинг и управление криптовалютными токенами в реальном времени">
+    
+    <!-- Шрифты -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -169,6 +190,16 @@
         @keyframes titlePulse {
             0%, 100% { text-shadow: 2px 2px 4px rgba(0,0,0,0.5), 0 0 20px rgba(178, 34, 34, 0.3); }
             50% { text-shadow: 2px 2px 4px rgba(0,0,0,0.5), 0 0 30px rgba(178, 34, 34, 0.6); }
+        }
+        
+        @keyframes rocketFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(5deg); }
+        }
+        
+        .rocket-icon {
+            animation: rocketFloat 3s ease-in-out infinite;
+            display: inline-block;
         }
         
         .pump-text {
@@ -643,7 +674,19 @@
     <div class="floating-orbs" id="floating-orbs"></div>
     
     <header>
-        <h1>PTS project</h1>
+        <div style="display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; padding: 0 40px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span class="rocket-icon" style="font-size: 48px;">🚀</span>
+                <div>
+                    <h1 style="margin: 0; font-size: 52px; text-align: left;">PTS project</h1>
+                    <p style="margin: 0; font-size: 16px; color: rgba(255,255,255,0.7); font-weight: 400;">Token Pump Station</p>
+                </div>
+            </div>
+            <div style="text-align: right; color: rgba(255,255,255,0.6); font-size: 12px; font-weight: 400;">
+                <div>🔥 Live Token Monitor</div>
+                <div>⚡ Real-time Updates</div>
+            </div>
+        </div>
     </header>
     
     <div class="pulse-ring"></div>
@@ -660,7 +703,10 @@
     </div>
     
     <div id="copy-notification" class="copy-notification">Contract copied!</div>
-    <div class="copyright">© 2024 PTS Project</div>
+    
+    <div class="copyright">
+        🚀 © 2024 PTS Project - Token Pump Station
+    </div>
     
     <!-- Админ-панель -->
     <button class="admin-toggle" onclick="toggleAdminPanel()" title="Admin Panel">⚙️</button>
