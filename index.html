@@ -918,25 +918,6 @@
             }
         });
         
-        // 🔐 Альтернативная активация: 5 быстрых кликов по заголовку
-        let clickCount = 0;
-        let clickTimer = null;
-        document.querySelector('h1').addEventListener('click', function() {
-            clickCount++;
-            
-            if (clickTimer) clearTimeout(clickTimer);
-            
-            clickTimer = setTimeout(() => {
-                clickCount = 0;
-            }, 2000); // Сброс через 2 секунды
-            
-            if (clickCount >= 5) {
-                clickCount = 0;
-                clearTimeout(clickTimer);
-                activateAdminMode();
-            }
-        });
-        
         function activateAdminMode() {
             const adminToggle = document.querySelector('.admin-toggle');
             if (adminToggle.style.display === 'block') {
