@@ -51,6 +51,17 @@ app.get('/token', (req, res) => {
     res.json(currentToken);
 });
 
+// Публичный эндпоинт для времени следующего обновления
+app.get('/next-update-time', (req, res) => {
+    const timeData = {
+        nextUpdateTime,
+        timeLeft: nextUpdateTime - Date.now(),
+        serverTime: Date.now()
+    };
+    console.log('Запрос времени обновления:', timeData);
+    res.json(timeData);
+});
+
 app.get('/admin-status', checkAdminAuth, (req, res) => {
     const status = { 
         currentToken, 

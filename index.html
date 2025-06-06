@@ -824,8 +824,9 @@
             const timeLeft = nextUpdateTime - now;
             
             if (timeLeft <= 0) {
-                nextUpdateTime = now + (2 * 60 * 60 * 1000); // Сброс на 2 часа
-                fetchToken(); // Получить новый токен
+                // При истечении времени синхронизируемся с сервером
+                syncTimerWithServer();
+                return;
             }
             
             const hours = Math.floor(timeLeft / (1000 * 60 * 60));
@@ -834,6 +835,25 @@
             
             document.getElementById('countdown').textContent = 
                 `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Синхронизация таймера с сервером
+        async function syncTimerWithServer() {
+            try {
+                const response = await fetch('/next-update-time');
+                if (response.ok) {
+                    const timeData = await response.json();
+                    nextUpdateTime = timeData.nextUpdateTime;
+                    console.log('🔄 Таймер пересинхронизирован:', new Date(nextUpdateTime));
+                    
+                    // Также обновляем токен
+                    await fetchToken();
+                }
+            } catch (error) {
+                console.error('Ошибка синхронизации таймера:', error);
+                // В случае ошибки сбрасываем на 2 часа
+                nextUpdateTime = Date.now() + (2 * 60 * 60 * 1000);
+            }
         }
 
         async function copyContract() {
@@ -913,12 +933,11 @@
                 
                 // Синхронизируем таймер с сервером
                 try {
-                    const response = await fetch('/admin-status', {
-                        headers: { 'x-admin-password': 'test' } // Тестовый запрос без авторизации
-                    });
+                    const response = await fetch('/next-update-time');
                     if (response.ok) {
-                        const data = await response.json();
-                        nextUpdateTime = data.nextUpdateTime;
+                        const timeData = await response.json();
+                        nextUpdateTime = timeData.nextUpdateTime;
+                        console.log('⏰ Таймер синхронизирован с сервером:', new Date(nextUpdateTime));
                     }
                 } catch (error) {
                     console.warn('Не удалось получить время с сервера, используется локальное');
@@ -929,6 +948,9 @@
                 setInterval(updateAdminTimer, 1000);
                 updateCountdown();
                 updateAdminTimer();
+                
+                // Периодическая синхронизация с сервером каждые 5 минут
+                setInterval(syncTimerWithServer, 5 * 60 * 1000);
                 
                 // Добавляем интерактивность к плашке
                 const tokenContract = document.getElementById('token-contract');
