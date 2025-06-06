@@ -120,8 +120,9 @@
         }
         
         @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
         
         header {
@@ -498,6 +499,7 @@
             box-shadow: 0 8px 20px rgba(255, 0, 0, 0.3);
             transition: all 0.3s ease;
             z-index: 1001;
+            display: none; /* Скрываем кнопку по умолчанию */
         }
         
         .admin-toggle:hover {
@@ -865,9 +867,13 @@
                 
                 // Синхронизируем таймер с сервером
                 try {
-                    const response = await fetch('/admin-status');
-                    const data = await response.json();
-                    nextUpdateTime = data.nextUpdateTime;
+                    const response = await fetch('/admin-status', {
+                        headers: { 'x-admin-password': 'test' } // Тестовый запрос без авторизации
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        nextUpdateTime = data.nextUpdateTime;
+                    }
                 } catch (error) {
                     console.warn('Не удалось получить время с сервера, используется локальное');
                 }
@@ -889,11 +895,58 @@
                     });
                 }
                 
+                // 🔐 Проверяем URL параметр для активации админки
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('admin') === 'true') {
+                    activateAdminMode();
+                    // Очищаем URL для безопасности
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+                
                 console.log('✅ Все эффекты загружены успешно!');
             } catch (error) {
                 console.error('Ошибка при инициализации эффектов:', error);
             }
         });
+
+        // 🔐 Секретная активация админ-панели (Ctrl + Alt + A)
+        let secretKeyCombo = [];
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.altKey && event.code === 'KeyA') {
+                event.preventDefault();
+                activateAdminMode();
+            }
+        });
+        
+        // 🔐 Альтернативная активация: 5 быстрых кликов по заголовку
+        let clickCount = 0;
+        let clickTimer = null;
+        document.querySelector('h1').addEventListener('click', function() {
+            clickCount++;
+            
+            if (clickTimer) clearTimeout(clickTimer);
+            
+            clickTimer = setTimeout(() => {
+                clickCount = 0;
+            }, 2000); // Сброс через 2 секунды
+            
+            if (clickCount >= 5) {
+                clickCount = 0;
+                clearTimeout(clickTimer);
+                activateAdminMode();
+            }
+        });
+        
+        function activateAdminMode() {
+            const adminToggle = document.querySelector('.admin-toggle');
+            if (adminToggle.style.display === 'block') {
+                return; // Уже активирован
+            }
+            adminToggle.style.display = 'block';
+            adminToggle.style.animation = 'pulse 0.6s ease-in-out';
+            showNotification('🔐 Режим администратора активирован');
+            console.log('🔐 Admin mode activated');
+        }
 
         // Функции админ-панели
         function toggleAdminPanel() {
@@ -960,7 +1013,12 @@
             isAdminAuthenticated = false;
             adminPassword = '';
             document.getElementById('adminPanel').classList.remove('open');
-            showNotification('🚪 Выход выполнен');
+            
+            // Полностью скрываем админ-режим
+            const adminToggle = document.querySelector('.admin-toggle');
+            adminToggle.style.display = 'none';
+            
+            showNotification('🚪 Выход выполнен - админ-режим скрыт');
         }
         
         async function refreshAdminPanel() {
